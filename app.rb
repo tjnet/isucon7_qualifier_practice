@@ -338,15 +338,19 @@ class App < Sinatra::Base
     #  return row['data']
     #end
     #404
-    redirect to ("/icons/#{file_name}")
+    path = "public/icons/#{file_name}"
+    send_file path, status: 200
   end
 
   get '/write_files' do
-    (1..1005).each do |id|
+    (1..2000).each do |id|
+      puts "id: #{id}"
       # executable at once
       statement = db.prepare('SELECT * FROM image WHERE id = ?')
-      row = statement.execute(id).first
+      row = statement.execute(id)&.first
+      next if row.nil?
       statement.close
+      
       File.write("../public/icons/#{row['name']}", row['data'])
       puts "image file created! #{row['name']}"
     end
