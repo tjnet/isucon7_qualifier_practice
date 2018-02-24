@@ -8,6 +8,12 @@ class App < Sinatra::Base
     set :public_folder, File.expand_path('../../public', __FILE__)
     set :avatar_max_size, 1 * 1024 * 1024
 
+    # logging is enabled by default in classic style applications,
+    # so `enable :logging` is not needed
+    file = File.new("#{settings.root}/log/#{settings.environment}.log", 'a+')
+    file.sync = true
+    use Rack::CommonLogger, file
+
     enable :sessions
   end
 
@@ -322,16 +328,29 @@ class App < Sinatra::Base
 
   get '/icons/:file_name' do
     file_name = params[:file_name]
-    statement = db.prepare('SELECT * FROM image WHERE name = ?')
-    row = statement.execute(file_name).first
-    statement.close
-    ext = file_name.include?('.') ? File.extname(file_name) : ''
-    mime = ext2mime(ext)
-    if !row.nil? && !mime.empty?
-      content_type mime
-      return row['data']
+    #statement = db.prepare('SELECT * FROM image WHERE name = ?')
+    #row = statement.execute(file_name).first
+    #statement.close
+    #ext = file_name.include?('.') ? File.extname(file_name) : ''
+    #mime = ext2mime(ext)
+    #if !row.nil? && !mime.empty?
+    #  content_type mime
+    #  return row['data']
+    #end
+    #404
+    redirect to ("/icons/#{params[:file_name]}")
+  end
+
+  get '/write_files' do
+    (1..1005).each do |id|
+      # executable at once
+      statement = db.prepare('SELECT * FROM image WHERE id = ?')
+      row = statement.execute(id).first
+      statement.close
+      File.write("../public/icons/#{row['name']}", row['data'])
+      puts "image file created! #{row['name']}"
     end
-    404
+    200
   end
 
   private
