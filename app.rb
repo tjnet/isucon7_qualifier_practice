@@ -338,7 +338,7 @@ class App < Sinatra::Base
     #  return row['data']
     #end
     #404
-    redirect to ("/icons/#{params[:file_name]}")
+    redirect to ("/icons/#{file_name}")
   end
 
   get '/write_files' do
