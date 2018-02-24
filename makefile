@@ -9,6 +9,9 @@ db-log:
 alp:
 	@alp -f /var/log/nginx/isucon7.access.log.tsv
 
+slow-log:
+	@tail -f /var/log/mysql/mysq-slow.log
+
 nginx-log:
 	@tail -f /var/log/nginx/access.log
 network-log:
