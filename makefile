@@ -1,11 +1,18 @@
 ## taken from http://saboyutaka.hatenablog.com/entry/2017/08/23/011204
-restart:
-	@systemctl stop isubata.ruby.service
-	@systemctl start isubata.ruby.service
 
-db-log:
-	@tail -f /var/lib/mysql/150-95-132-103.log
+start:
+	@mkdir -p tmp/pids
+	@bundle exec puma -p 5000 -t 10 -d -e production --pidfile=tmp/pids/puma.pid
 
+stop:
+	@kill -15 `cat tmp/pids/puma.pid`
+
+restart: 
+	@make stop && make start
+
+dev-server:
+	@mkdir -p tmp/pids
+	@bundle exec puma -p 5000 -t 10 -e development --pidfile=tmp/pids/puma.pid
 alp:
 	@alp -f /var/log/nginx/isucon7.access.log.tsv
 

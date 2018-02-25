@@ -2,6 +2,8 @@ require 'digest/sha1'
 require 'mysql2'
 require 'sinatra/base'
 require "logger"
+require "redis"
+require "pry"
 
 class App < Sinatra::Base
   configure do
@@ -57,7 +59,6 @@ class App < Sinatra::Base
   end
 
   get '/' do
-    puts 'hello'
     if session.has_key?(:user_id)
       return redirect '/channel/1', 303
     end
