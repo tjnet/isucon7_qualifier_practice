@@ -13,11 +13,11 @@ class App < Sinatra::Base
     # so `enable :logging` is not needed
     file = File.new("#{settings.root}/log/#{settings.environment}.log", 'a+')
     # NOTE: taken from https://coderwall.com/p/60qhba/logging-exceptions-on-sinatra
-    #STDOUT.reopen(file)
-    #STDERR.reopen(file)
+    # STDOUT.reopen(file)
+    # STDERR.reopen(file)
 
-    #STDOUT.sync = true
-    #STDERR.sync = true
+    # STDOUT.sync = true
+    # STDERR.sync = true
 
     file.sync = true
     use Rack::CommonLogger, file
@@ -171,11 +171,13 @@ class App < Sinatra::Base
     rows = db.query('SELECT id FROM channel').to_a
     channel_ids = rows.map { |row| row['id'] }
 
+    statement = db.prepare('SELECT * FROM haveread WHERE user_id = ?')
+    havereads = statement.execute(user_id).to_a
+    statement.close
+
     res = []
     channel_ids.each do |channel_id|
-      statement = db.prepare('SELECT * FROM haveread WHERE user_id = ? AND channel_id = ?')
-      row = statement.execute(user_id, channel_id).first
-      statement.close
+      row = havereads.select{|e| e['channel_id'] == channel_id }.shift
       r = {}
       r['channel_id'] = channel_id
       r['unread'] = if row.nil?
