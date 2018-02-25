@@ -13,11 +13,11 @@ class App < Sinatra::Base
     # so `enable :logging` is not needed
     file = File.new("#{settings.root}/log/#{settings.environment}.log", 'a+')
     # NOTE: taken from https://coderwall.com/p/60qhba/logging-exceptions-on-sinatra
-    STDOUT.reopen(file)
-STDERR.reopen(file)
+    #STDOUT.reopen(file)
+    #STDERR.reopen(file)
 
-STDOUT.sync = true
-STDERR.sync = true
+    #STDOUT.sync = true
+    #STDERR.sync = true
 
     file.sync = true
     use Rack::CommonLogger, file
@@ -210,19 +210,17 @@ STDERR.sync = true
     @page = @page.to_i
 
     n = 20
-    statement = db.prepare('SELECT * FROM message WHERE channel_id = ? ORDER BY id DESC LIMIT ? OFFSET ?')
+    statement = db.prepare('SELECT * FROM message inner join user on message.user_id = user.id WHERE channel_id = ? ORDER BY message.id DESC LIMIT ? OFFSET ?')
     rows = statement.execute(@channel_id, n, (@page - 1) * n).to_a
     statement.close
     @messages = []
     rows.each do |row|
       r = {}
       r['id'] = row['id']
-      statement = db.prepare('SELECT name, display_name, avatar_icon FROM user WHERE id = ?')
-      r['user'] = statement.execute(row['user_id']).first
+      r['user'] = {"name" => row['name'], "display_name" => row['display_name'], "avatar_icon" => row['avatar_icon'] }
       r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
       r['content'] = row['content']
       @messages << r
-      statement.close
     end
     @messages.reverse!
 
