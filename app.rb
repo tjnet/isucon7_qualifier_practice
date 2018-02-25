@@ -1,6 +1,7 @@
 require 'digest/sha1'
 require 'mysql2'
 require 'sinatra/base'
+require "logger"
 
 class App < Sinatra::Base
   configure do
@@ -11,6 +12,13 @@ class App < Sinatra::Base
     # logging is enabled by default in classic style applications,
     # so `enable :logging` is not needed
     file = File.new("#{settings.root}/log/#{settings.environment}.log", 'a+')
+    # NOTE: taken from https://coderwall.com/p/60qhba/logging-exceptions-on-sinatra
+    STDOUT.reopen(file)
+STDERR.reopen(file)
+
+STDOUT.sync = true
+STDERR.sync = true
+
     file.sync = true
     use Rack::CommonLogger, file
 
@@ -49,6 +57,7 @@ class App < Sinatra::Base
   end
 
   get '/' do
+    puts 'hello'
     if session.has_key?(:user_id)
       return redirect '/channel/1', 303
     end
